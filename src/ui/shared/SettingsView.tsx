@@ -1,7 +1,26 @@
-import { ArrowLeft, Bug, Check, ChevronRight, EyeOff, Globe, Shield, Sparkles, Star } from 'lucide-react';
+import {
+  ArrowLeft,
+  Brain,
+  Bug,
+  Check,
+  ChevronRight,
+  EyeOff,
+  Globe,
+  Plus,
+  Shield,
+  Sparkles,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { i18n } from '#imports';
 import { PRESET_LABELS, type PresetKey } from '@/core/blur/regexes';
+import {
+  type ContextProfile,
+  createEmptyProfile,
+  loadContextProfiles,
+  saveContextProfiles,
+} from '@/core/capture/ai/context-profiles';
 import { AI_PROVIDERS, type AIProviderKey } from '@/core/capture/ai/models';
 import { AI_LANGUAGES, type AILanguageCode } from '@/core/capture/ai/prompts';
 import { localStorage } from '@/lib/browser-api';
@@ -18,6 +37,7 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
   const [apiKey, setApiKey] = useState('');
   const [saved, setSaved] = useState(false);
   const [aiLanguage, setAiLanguage] = useState<AILanguageCode>('en');
+  const [contextProfiles, setContextProfiles] = useState<ContextProfile[]>([]);
   const [blurPresets, setBlurPresets] = useState<Record<PresetKey, boolean>>({
     email: true,
     phone: true,
@@ -36,6 +56,7 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
       if (result.aiLanguage) setAiLanguage(result.aiLanguage as AILanguageCode);
       if (result.blurPresets) setBlurPresets(result.blurPresets as Record<PresetKey, boolean>);
     });
+    loadContextProfiles().then(setContextProfiles);
   }, []);
 
   const handleProviderChange = (newProvider: AIProviderKey) => {
@@ -43,8 +64,20 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
     setModel(AI_PROVIDERS[newProvider].defaultModel);
   };
 
+  const updateProfile = (id: string, patch: Partial<ContextProfile>) => {
+    setContextProfiles((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  };
+
+  const addProfile = () => setContextProfiles((prev) => [...prev, createEmptyProfile()]);
+
+  const removeProfile = (id: string) => setContextProfiles((prev) => prev.filter((p) => p.id !== id));
+
   const handleSave = async () => {
     await localStorage.set({ aiApiKey: apiKey, aiProvider: provider, aiModel: model, aiLanguage, blurPresets });
+    // Drop fully empty profiles so saving never persists blank rows.
+    const cleaned = contextProfiles.filter((p) => p.name.trim() || p.urlPattern.trim() || p.context.trim());
+    await saveContextProfiles(cleaned);
+    setContextProfiles(cleaned);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -137,6 +170,76 @@ export default function SettingsView({ onBack }: SettingsViewProps) {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="border border-border rounded-[10px] p-3.5 space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center">
+              <Brain size={14} className="text-accent" />
+            </div>
+            <span className="text-xs font-bold text-foreground">{i18n.t('settings.backgroundContext')}</span>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground leading-relaxed -mt-1">
+            {i18n.t('settings.backgroundContextHint')}
+          </p>
+
+          {contextProfiles.map((profile) => (
+            <div key={profile.id} className="border border-border rounded-lg p-2.5 space-y-2 bg-secondary/40">
+              <div className="flex items-center gap-2">
+                <Input
+                  value={profile.name}
+                  onChange={(e) => updateProfile(profile.id, { name: e.target.value })}
+                  placeholder={i18n.t('settings.contextNamePlaceholder')}
+                  className="h-8 text-[13px] font-semibold"
+                />
+                <button
+                  type="button"
+                  onClick={() => updateProfile(profile.id, { enabled: !profile.enabled })}
+                  title={profile.enabled ? i18n.t('settings.contextEnabled') : i18n.t('settings.contextDisabled')}
+                  className={`w-9 h-5 shrink-0 rounded-full transition-colors relative ${
+                    profile.enabled ? 'bg-accent' : 'bg-border'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
+                      profile.enabled ? 'translate-x-4' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeProfile(profile.id)}
+                  title={i18n.t('settings.contextRemove')}
+                  className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-card transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <Input
+                value={profile.urlPattern}
+                onChange={(e) => updateProfile(profile.id, { urlPattern: e.target.value })}
+                placeholder={i18n.t('settings.contextUrlPlaceholder')}
+                className="h-8 text-[12px] font-mono"
+              />
+              <textarea
+                value={profile.context}
+                onChange={(e) => updateProfile(profile.id, { context: e.target.value })}
+                placeholder={i18n.t('settings.contextBlobPlaceholder')}
+                rows={5}
+                className="w-full border border-border rounded-lg px-3 py-2 text-[12px] text-foreground bg-card leading-relaxed outline-none focus:border-ring focus:ring-2 focus:ring-ring/10 resize-y"
+              />
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={addProfile}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-border text-[11px] font-semibold text-accent hover:bg-secondary transition-colors"
+          >
+            <Plus size={13} />
+            {i18n.t('settings.contextAdd')}
+          </button>
         </div>
 
         <div className="border border-border rounded-[10px] p-3.5 space-y-1">

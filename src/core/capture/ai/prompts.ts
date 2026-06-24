@@ -50,3 +50,13 @@ export function getLanguageSuffix(locale: string): string {
   const lang = LANGUAGE_NAMES[locale.split('-')[0]] || locale;
   return `\nIMPORTANT: Write the description in ${lang}.`;
 }
+
+/**
+ * Wraps a user-provided background context blob into a prompt prefix. Returns an
+ * empty string when there is no context, so callers can prepend unconditionally.
+ */
+export function getContextPrefix(appContext: string | null | undefined): string {
+  const ctx = appContext?.trim();
+  if (!ctx) return '';
+  return `Background knowledge about the application you are documenting. Use it to write accurate, specific descriptions with the correct product, feature and terminology names, but only describe what the current step actually does:\n${ctx}\n\n---\n\n`;
+}

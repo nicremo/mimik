@@ -1,3 +1,4 @@
+import { getContextForUrl } from '@/core/capture/ai/context-profiles';
 import { getAIDescription } from '@/core/capture/ai/description';
 import type { DOMContext } from '@/core/capture/dom/context';
 import { CaptureState } from '@/core/capture/machine';
@@ -34,13 +35,14 @@ async function takeScreenshot(stepId: string, meta: ElementMeta): Promise<string
   }
 }
 
-async function tryAIDescription(stepId: string, domContext: DOMContext) {
+async function tryAIDescription(stepId: string, domContext: DOMContext, url?: string) {
   const settings = await localStorage.get(['aiApiKey', 'aiProvider', 'aiModel']);
   if (!settings.aiApiKey) return;
 
   const provider = (settings.aiProvider as string) || 'openai';
   const model = (settings.aiModel as string) || 'gpt-4o-mini';
-  const description = await getAIDescription(domContext, provider, model, settings.aiApiKey as string);
+  const appContext = await getContextForUrl(url);
+  const description = await getAIDescription(domContext, provider, model, settings.aiApiKey as string, appContext);
   if (description) await updateStepDescription(stepId, description);
 }
 
@@ -71,7 +73,7 @@ export async function handleCaptureStep(data: CaptureStepData): Promise<CaptureS
 
   if (data.action !== 'input' && data.domContext) {
     try {
-      await tryAIDescription(stepId, data.domContext);
+      await tryAIDescription(stepId, data.domContext, snap.context.currentUrl);
     } catch (err) {
       logger.error('AI description failed', err);
     }
@@ -99,7 +101,8 @@ export async function handleFinalizeInputStep(
 
   if (domContext) {
     try {
-      await tryAIDescription(stepId, domContext);
+      const step = await db.steps.get(stepId);
+      await tryAIDescription(stepId, domContext, step?.url);
     } catch (err) {
       logger.error('AI description failed on finalize', err);
     }

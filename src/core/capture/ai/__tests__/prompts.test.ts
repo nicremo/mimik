@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { AI_LANGUAGES, getLanguageSuffix } from '../prompts';
+import { AI_LANGUAGES, getContextPrefix, getLanguageSuffix } from '../prompts';
+
+describe('getContextPrefix', () => {
+  it('returns empty string for null/undefined/blank', () => {
+    expect(getContextPrefix(null)).toBe('');
+    expect(getContextPrefix(undefined)).toBe('');
+    expect(getContextPrefix('   ')).toBe('');
+  });
+
+  it('wraps the context and ends with a separator', () => {
+    const prefix = getContextPrefix('BLUNATECH is a SaaS app.');
+    expect(prefix).toContain('BLUNATECH is a SaaS app.');
+    expect(prefix).toContain('Background knowledge');
+    expect(prefix.endsWith('---\n\n')).toBe(true);
+  });
+});
 
 describe('getLanguageSuffix', () => {
   it('returns empty string for English', () => {

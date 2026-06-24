@@ -1,4 +1,5 @@
 import { browser, defineBackground, i18n } from '#imports';
+import { getContextForUrls } from '@/core/capture/ai/context-profiles';
 import { generateGuideTitle } from '@/core/capture/ai/title';
 import { advanceSession, cancelSession, completeSession, getSession, startSession } from '@/core/guideme/session';
 import { createGuide, getGuideDomain, getStepsForGuide, updateGuideTitle } from '@/core/guides/service';
@@ -30,7 +31,8 @@ async function generateTitleInBackground(guideId: string) {
 
     const provider = (settings.aiProvider as string) || 'openai';
     const model = (settings.aiModel as string) || 'gpt-4o-mini';
-    const title = await generateGuideTitle(stepsWithUrl, provider, model, settings.aiApiKey as string);
+    const appContext = await getContextForUrls(allSteps.map((s) => s.url));
+    const title = await generateGuideTitle(stepsWithUrl, provider, model, settings.aiApiKey as string, appContext);
     if (title) {
       await updateGuideTitle(guideId, title);
       logger.info('Generated guide title:', title);

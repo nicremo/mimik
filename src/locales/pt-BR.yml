@@ -83,6 +83,15 @@ settings:
   model: Modelo
   apiKey: Chave da API
   aiLanguage: "Idioma das descrições"
+  backgroundContext: Contexto de fundo
+  backgroundContextHint: "Dê à IA conhecimento extra sobre apps específicos. Ao gravar em uma URL correspondente, esse contexto é adicionado ao prompt para que descrições e títulos usem os nomes corretos de produto e recursos."
+  contextNamePlaceholder: "Nome (ex.: BLUNATECH)"
+  contextUrlPlaceholder: "Correspondência de URL (ex.: app.blunatech.com)"
+  contextBlobPlaceholder: "Cole tudo o que a IA deve saber sobre este app: o que faz, páginas principais, recursos, terminologia…"
+  contextAdd: Adicionar perfil de contexto
+  contextRemove: Remover
+  contextEnabled: Ativado
+  contextDisabled: Desativado
   saveSettings: Salvar ajustes
   saved: Salvo
   smartBlur: Desfoque inteligente

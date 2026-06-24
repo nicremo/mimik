@@ -1,7 +1,7 @@
 import { generateText } from 'ai';
 import { localStorage } from '@/lib/browser-api';
 import { logger } from '@/lib/logger';
-import { GUIDE_TITLE_PROMPT, getLanguageSuffix } from './prompts';
+import { GUIDE_TITLE_PROMPT, getContextPrefix, getLanguageSuffix } from './prompts';
 import { createModel } from './provider';
 
 export async function generateGuideTitle(
@@ -9,6 +9,7 @@ export async function generateGuideTitle(
   provider: string,
   model: string,
   apiKey: string,
+  appContext?: string | null,
 ): Promise<string | null> {
   if (steps.length === 0) return null;
 
@@ -19,7 +20,8 @@ export async function generateGuideTitle(
     const locale = (settings.aiLanguage as string) || 'en';
     const { text } = await generateText({
       model: createModel(provider, model, apiKey),
-      prompt: GUIDE_TITLE_PROMPT.replace('{{steps}}', formatted) + getLanguageSuffix(locale),
+      prompt:
+        getContextPrefix(appContext) + GUIDE_TITLE_PROMPT.replace('{{steps}}', formatted) + getLanguageSuffix(locale),
       maxOutputTokens: 30,
     });
     let title = text.trim().replace(/^"|"$/g, '');

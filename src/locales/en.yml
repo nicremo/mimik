@@ -83,6 +83,15 @@ settings:
   model: Model
   apiKey: API Key
   aiLanguage: Description Language
+  backgroundContext: Background Context
+  backgroundContextHint: "Give the AI extra knowledge about specific apps. When you record on a matching URL, this context is added to the prompt so descriptions and titles use the right product and feature names."
+  contextNamePlaceholder: "Name (e.g. BLUNATECH)"
+  contextUrlPlaceholder: "URL match (e.g. app.blunatech.com)"
+  contextBlobPlaceholder: "Paste everything the AI should know about this app: what it does, key pages, features, terminology…"
+  contextAdd: Add context profile
+  contextRemove: Remove
+  contextEnabled: Enabled
+  contextDisabled: Disabled
   saveSettings: Save Settings
   saved: Saved
   smartBlur: Smart Blur
