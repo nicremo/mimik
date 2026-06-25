@@ -48,7 +48,7 @@ describe('load/save round-trip', () => {
   it('returns the built-in default profiles when nothing stored', async () => {
     const profiles = await loadContextProfiles();
     expect(profiles.length).toBeGreaterThan(0);
-    expect(profiles.some((p) => p.urlPattern === 'app.blunatech.com')).toBe(true);
+    expect(profiles.some((p) => p.urlPattern === 'blunatech.com')).toBe(true);
   });
 
   it('respects an explicitly saved empty list', async () => {

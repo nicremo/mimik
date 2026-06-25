@@ -70,7 +70,8 @@ export const DEFAULT_CONTEXT_PROFILES: ContextProfile[] = [
   {
     id: 'blunatech-default',
     name: 'BLUNATECH',
-    urlPattern: 'app.blunatech.com',
+    // Bare domain so all subdomains match (app., partner., …).
+    urlPattern: 'blunatech.com',
     context: BLUNATECH_CONTEXT,
     enabled: true,
   },

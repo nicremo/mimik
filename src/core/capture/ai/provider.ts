@@ -12,12 +12,15 @@ const OPENROUTER_HEADERS = {
 export function createModel(provider: string, model: string, apiKey: string) {
   if (provider === 'anthropic') return createAnthropic({ apiKey })(model);
   if (provider === 'openrouter') {
+    // @ai-sdk/openai's callable defaults to the Responses API (POST /responses),
+    // which OpenRouter does not implement. Force the Chat Completions API via
+    // .chat() so requests hit /chat/completions.
     return createOpenAI({
       apiKey,
       baseURL: OPENROUTER_BASE_URL,
       name: 'openrouter',
       headers: OPENROUTER_HEADERS,
-    })(model);
+    }).chat(model);
   }
   return createOpenAI({ apiKey })(model);
 }
