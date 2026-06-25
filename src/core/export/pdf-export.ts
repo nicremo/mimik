@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { i18n } from '#imports';
 import { blobToDataUrl, extractDomain, fetchFaviconBase64, formatDate } from '@/core/export/utils';
+import { renderAnnotatedBlob } from '@/core/guides/annotate';
 import type { Guide, Screenshot, Step } from '@/core/guides/types';
 import { logger } from '@/lib/logger';
 
@@ -124,12 +125,15 @@ export async function exportGuideAsPDF(
 
     const screenshot = screenshots.get(step.id);
     let imgDataUrl: string | null = null;
+    let imgFormat: 'JPEG' | 'PNG' = 'JPEG';
     const imgWidth = contentWidth - stepIndent;
     let imgHeight = 0;
 
     if (screenshot) {
       try {
-        imgDataUrl = await blobToDataUrl(screenshot.blob);
+        const annotated = await renderAnnotatedBlob(screenshot, { crop: true, type: 'image/jpeg', quality: 0.85 });
+        imgFormat = (annotated.type || screenshot.mimeType).includes('png') ? 'PNG' : 'JPEG';
+        imgDataUrl = await blobToDataUrl(annotated);
         imgHeight = Math.min((screenshot.height / screenshot.width) * imgWidth, maxImgHeight);
       } catch (err) {
         logger.warn('PDF: failed to load screenshot for step', step.index, err);
@@ -166,7 +170,7 @@ export async function exportGuideAsPDF(
         y = margin;
       }
 
-      doc.addImage(imgDataUrl, 'JPEG', margin + stepIndent, y, imgWidth, imgHeight);
+      doc.addImage(imgDataUrl, imgFormat, margin + stepIndent, y, imgWidth, imgHeight);
       y += imgHeight + stepSpacing;
     } else {
       y += stepSpacing;

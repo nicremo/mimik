@@ -1,5 +1,6 @@
 import { i18n } from '#imports';
 import { blobToBase64, extractDomain, formatDate } from '@/core/export/utils';
+import { renderAnnotatedBlob } from '@/core/guides/annotate';
 import type { Guide, Screenshot, Step } from '@/core/guides/types';
 
 export async function exportGuideAsMarkdown(
@@ -22,8 +23,12 @@ export async function exportGuideAsMarkdown(
 
     const screenshot = screenshots.get(step.id);
     if (screenshot) {
-      const b64 = await blobToBase64(screenshot.blob);
-      lines.push(`![${i18n.t('export.stepLabel', [num])}](data:${screenshot.mimeType};base64,${b64})`, '');
+      const annotated = await renderAnnotatedBlob(screenshot, { crop: true, type: 'image/jpeg', quality: 0.85 });
+      const b64 = await blobToBase64(annotated);
+      lines.push(
+        `![${i18n.t('export.stepLabel', [num])}](data:${annotated.type || screenshot.mimeType};base64,${b64})`,
+        '',
+      );
     }
   }
 

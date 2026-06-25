@@ -1,5 +1,6 @@
 import { i18n } from '#imports';
 import { blobToBase64, escapeHtml, extractDomain, fetchFaviconBase64, formatDate } from '@/core/export/utils';
+import { renderAnnotatedBlob } from '@/core/guides/annotate';
 import type { Guide, Screenshot, Step } from '@/core/guides/types';
 
 export async function exportGuideAsHTML(
@@ -13,8 +14,9 @@ export async function exportGuideAsHTML(
     const screenshot = screenshots.get(step.id);
     let imgHtml = '';
     if (screenshot) {
-      const b64 = await blobToBase64(screenshot.blob);
-      imgHtml = `<img src="data:${screenshot.mimeType};base64,${b64}" alt="${i18n.t('export.stepLabel', [String(step.index + 1)])}" style="max-width:100%;border-radius:8px;box-shadow:0 1px 4px rgba(30,27,75,0.06);margin-top:16px;" />`;
+      const annotated = await renderAnnotatedBlob(screenshot, { crop: true, type: 'image/jpeg', quality: 0.85 });
+      const b64 = await blobToBase64(annotated);
+      imgHtml = `<img src="data:${annotated.type || screenshot.mimeType};base64,${b64}" alt="${i18n.t('export.stepLabel', [String(step.index + 1)])}" style="max-width:100%;border-radius:8px;box-shadow:0 1px 4px rgba(30,27,75,0.06);margin-top:16px;" />`;
     }
 
     const stepNumber = String(step.index + 1).padStart(2, '0');
