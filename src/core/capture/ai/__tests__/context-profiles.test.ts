@@ -45,7 +45,14 @@ describe('load/save round-trip', () => {
     expect(await loadContextProfiles()).toEqual(profiles);
   });
 
-  it('returns empty array when nothing stored', async () => {
+  it('returns the built-in default profiles when nothing stored', async () => {
+    const profiles = await loadContextProfiles();
+    expect(profiles.length).toBeGreaterThan(0);
+    expect(profiles.some((p) => p.urlPattern === 'app.blunatech.com')).toBe(true);
+  });
+
+  it('respects an explicitly saved empty list', async () => {
+    await saveContextProfiles([]);
     expect(await loadContextProfiles()).toEqual([]);
   });
 });

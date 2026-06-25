@@ -1,4 +1,5 @@
 import { localStorage } from '@/lib/browser-api';
+import { DEFAULT_CONTEXT_PROFILES } from './default-profiles';
 
 /**
  * A background context profile lets the user attach domain knowledge about an
@@ -32,7 +33,9 @@ export function createEmptyProfile(): ContextProfile {
 export async function loadContextProfiles(): Promise<ContextProfile[]> {
   const result = await localStorage.get([STORAGE_KEY]);
   const raw = result[STORAGE_KEY];
-  return Array.isArray(raw) ? (raw as ContextProfile[]) : [];
+  // Once the user has saved (even an empty list), respect their choice; only
+  // fall back to the built-in defaults when nothing has ever been stored.
+  return Array.isArray(raw) ? (raw as ContextProfile[]) : DEFAULT_CONTEXT_PROFILES;
 }
 
 export async function saveContextProfiles(profiles: ContextProfile[]): Promise<void> {
