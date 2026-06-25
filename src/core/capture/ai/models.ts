@@ -31,16 +31,8 @@ export const AI_PROVIDERS: Record<string, AIProviderConfig> = {
   },
   openrouter: {
     label: 'OpenRouter',
-    defaultModel: 'openai/gpt-4o-mini',
-    models: [
-      { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini' },
-      { id: 'openai/gpt-4.1-mini', label: 'GPT-4.1 Mini' },
-      { id: 'anthropic/claude-3.5-haiku', label: 'Claude 3.5 Haiku' },
-      { id: 'anthropic/claude-sonnet-4', label: 'Claude Sonnet 4' },
-      { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
-      { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
-      { id: 'deepseek/deepseek-chat', label: 'DeepSeek Chat' },
-    ],
+    defaultModel: 'google/gemini-3.5-flash',
+    models: [{ id: 'google/gemini-3.5-flash', label: 'Gemini 3.5 Flash' }],
   },
 };
 
